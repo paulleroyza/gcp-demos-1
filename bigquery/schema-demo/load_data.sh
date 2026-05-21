@@ -57,7 +57,7 @@ SELECT
       qty,
       prod_name,
       prod_desc,
-      prod_price)) as line_items
+      prod_price) order by line_item_num) as line_items
 FROM
   dlow
 GROUP BY
@@ -71,17 +71,33 @@ GROUP BY
   cust_name,
   cust_id'
 
-bq query --use_legacy_sql=false \
---replace \
+bq query --use_legacy_sql=false --replace \
 --destination_table $project:bq_demo.table_nested_partitioned \
 --time_partitioning_field order_date \
-'SELECT * FROM '"\`$project.bq_demo.nested_once\`"
+"SELECT * FROM \`$project.bq_demo.nested_once\`"
 
 bq query --use_legacy_sql=false 'CREATE OR REPLACE TABLE 
 '"\`$project.bq_demo.table_nested_partitioned_clustered\`"' 
 PARTITION BY order_date 
 CLUSTER BY cust_zip AS 
 SELECT * FROM '"\`$project.bq_demo.nested_once\`"
+
+bq query --use_legacy_sql=false \
+--replace \
+--destination_table=$project:bq_demo.nested_twice "
+SELECT
+  cust_id,
+  cust_name,
+  cust_address,
+  cust_state,
+  cust_zip,
+  cust_email,
+  cust_phone,
+  array_agg(
+    STRUCT(order_num, order_date, line_items) ORDER BY order_date) as orders
+FROM \`$project\`.bq_demo.nested_once
+GROUP BY ALL"
+
 
 # bq query --use_legacy_sql=false \
 # --replace \

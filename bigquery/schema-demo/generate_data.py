@@ -27,8 +27,8 @@ def make_lines(order_string, num_products):
     for line_item_num in range(1, 11):
         order_num = order[0]
         line_item_num = str(line_item_num)
-        prod_code = str(random.randint(0, int(num_products)-1))  # radnint is inclusive, but all other python code is [inclusive,exclusive)
-        qty = str(random.randint(0, 10))
+        prod_code = str(random.randint(0, int(num_products)-1))
+        qty = str(random.randint(1, 10))
         row = [order_num, line_item_num, prod_code, qty]
         yield ",".join(row)
 
